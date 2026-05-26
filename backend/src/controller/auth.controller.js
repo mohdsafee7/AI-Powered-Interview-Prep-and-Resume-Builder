@@ -62,12 +62,49 @@ async function registerUserController(req, res){
  * @description login a user, expects email and password in body
  * @access Public
  */
+//login controller function to handle the login of a user, it will check if the user exists, if yes it will compare the password with the hashed password in the database
 async function loginUserController(req, res){
-  
+    const { email, password } = req.body;
+
+    if(!email || !password){
+      return res.status(400).json({ message: "Please provide email and password" });
+    }
+
+    const user = await userModel.findOne({ email });
+
+    if(!user){
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password); //compare the password with the hashed password in the database
+
+    if(!isPasswordValid){
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    //now create token for the user and send it back in the response, using jsonwebtoken with a secret key
+    const token = jwt.sign(
+      {id: user._id, username: user.username }, //payload of the token will contain the user id and username
+      process.env.JWT_SECRET, //secret key for signing the token, should be stored in .env file
+      {expiresIn: "1d"}
+    )
+
+    res.cookie("token", token) //set the token in a cookie
+
+    return res.status(200).json({
+      message: "User logged in successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      }
+    })
+
 }
 
 
 
 module.exports = {
   registerUserController,
+  loginUserController
 }
