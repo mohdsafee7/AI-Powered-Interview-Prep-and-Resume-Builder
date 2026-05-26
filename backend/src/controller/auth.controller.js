@@ -1,4 +1,5 @@
 const userModel = require('../models/user.model');
+const tokenBlacklistModel = require('../models/blackllist.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 /**
@@ -17,11 +18,11 @@ async function registerUserController(req, res){
       return res.status(400).json({ message: "Please provide username, email and password" });
     }
 
-    const isUserAlreadyExists = await userModel.findOne({
+    const UserAlreadyExists = await userModel.findOne({
       $or : [ {username}, {email} ]
     })
 
-    if(userAlreadyExists){
+    if(UserAlreadyExists){
       return res.status(400).json({
         message: "Account already exists with this email/username"
       })
@@ -104,7 +105,23 @@ async function loginUserController(req, res){
 
 
 
+//
+async function logoutUserController(req, res){
+  const token = req.cookies.token;
+
+  if(token){
+    await tokenBlacklistModel.create({token})
+  }
+
+  res.clearCookie("token")
+
+  res.status(200).json({
+    message: "User logged out successfully"
+  })
+}
+
 module.exports = {
   registerUserController,
-  loginUserController
+  loginUserController,
+  logoutUserController
 }
