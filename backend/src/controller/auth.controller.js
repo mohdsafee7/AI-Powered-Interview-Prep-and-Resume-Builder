@@ -105,7 +105,12 @@ async function loginUserController(req, res){
 
 
 
-//
+/**
+ * @name logoutUserController
+ * @description clear token from user cookie and add the token in blacklist, expects a valid token in the cookie
+ * @access Public
+ */
+//logout controller function to handle the logout of a user, it will clear the token from the user cookie and add the token in blacklist, so that it cannot be used again for authentication
 async function logoutUserController(req, res){
   const token = req.cookies.token;
 
@@ -120,8 +125,30 @@ async function logoutUserController(req, res){
   })
 }
 
+
+/**
+ * @name getMeController
+ * @description Get the currently logged in user's information
+ * @access Private
+ */
+async function getMeController(req, res){
+  const user = await userModel.findById(req.user.id)
+
+  res.status(200).json({
+    message: "User information retrieved successfully",
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+    }
+  })
+}
+
+
+
 module.exports = {
   registerUserController,
   loginUserController,
-  logoutUserController
+  logoutUserController,
+  getMeController
 }

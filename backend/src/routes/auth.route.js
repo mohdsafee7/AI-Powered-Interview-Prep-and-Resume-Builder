@@ -1,7 +1,7 @@
 const express = require('express');
-const { registerUserController, loginUserController, logoutUserController } = require('../controller/auth.controller');
+const { registerUserController, loginUserController, logoutUserController, getMeController } = require('../controller/auth.controller');
 const authRouter = express.Router();
-
+const authMiddleware = require('../middlewares/auth.middleware');
 /**
  * @route POST /api/auth/register
  * @description Register a new user
@@ -22,5 +22,14 @@ authRouter.post('/login', loginUserController);
  * @access Public
  */
 authRouter.get('/logout', logoutUserController);
+
+
+/**
+ * @route GET /api/auth/get-me
+ * @description Get the currently logged in user's information, expects a valid token in the cookie
+ * @access Private
+ */
+authRouter.get('/get-me', authMiddleware, getMeController);
+
 
 module.exports = authRouter;
