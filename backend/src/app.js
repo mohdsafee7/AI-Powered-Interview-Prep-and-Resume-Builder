@@ -2,9 +2,9 @@ const express = require('express');
 const authRouter = require('./routes/auth.route');
 const cookieParser = require("cookie-parser");
 
-const app = express();
+const app = express(); // express application
 
-app.use(express.json());
+app.use(express.json()); //it reads incoming requests with JSON payloads and makes the data available in req.body
 
 app.use(cookieParser());
 

@@ -2,12 +2,12 @@ const userModel = require('../models/user.model');
 const tokenBlacklistModel = require('../models/blackllist.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+
 /**
  * @name registerUserController
  * @description Register a new user, expects username, email and password in the request body
  * @access Public
  */
-
 
 //register controller function to handle the registration of a new user, it will check if the user already exists, 
 // if not it will hash the password and save the user to the database, then it will create a token for the user and send it back in the response
