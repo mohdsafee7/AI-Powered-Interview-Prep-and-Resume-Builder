@@ -30,7 +30,8 @@ authRouter.get('/logout', logoutUserController);
  * @description Get the currently logged in user's information, expects a valid token in the cookie
  * @access Private
  */
-authRouter.get('/get-me', authMiddleware, getMeController);
+authRouter.get('/get-me', authMiddleware, getMeController); //middleware will identify who sending the request and will add the user information in the request object,
+// so that we can use it in the controller function to get the user information from the database
 
 
 module.exports = authRouter;

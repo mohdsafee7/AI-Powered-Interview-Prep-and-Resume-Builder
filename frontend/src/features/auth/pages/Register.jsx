@@ -1,11 +1,11 @@
-import React from 'react'
+// import React from 'react'
 import { useNavigate, Link } from 'react-router'
 
 const Register = () => {
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
-    e.preventdefault();
+    e.preventDefault();
   }
   return (
      <main>
@@ -32,7 +32,7 @@ const Register = () => {
           
         </form>
 
-        <p>Already have an Account?<Link to={"/login"}>Login</Link> </p>
+        <p>Already have an account? <Link to={"/login"}>Login</Link></p>
       </div>
     </main>
   )

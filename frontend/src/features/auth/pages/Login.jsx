@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 import "../auth.form.scss" 
 import { Link } from 'react-router'
 
