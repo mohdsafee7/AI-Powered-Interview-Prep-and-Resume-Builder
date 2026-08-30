@@ -2,6 +2,7 @@ const express = require('express');
 const authRouter = require('./routes/auth.route');
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const interviewRouter = require('./routes/interview.routes');
 
 const app = express(); // express application
 
@@ -15,6 +16,6 @@ app.use(cors({
 }))
 
 app.use('/api/auth', authRouter); // all the routes related to authentication will be prefixed with /api/auth
-
+app.use('/api/interview', interviewRouter); // all the routes related to interview will be prefixed with /api/interview
 
 module.exports = app;
