@@ -4,21 +4,21 @@ const interviewReportModel = require('../models/interviewReport.model.js'); // I
 
 
 async function generateInterviewReportController(req, res) {
-  // const resumeFile = req.file; // Access the uploaded resume file
+  const resumeFile = req.file; // Access the uploaded resume file
 
-  const resumeContent = await pdfParse(resumeFile.buffer); // Extract text from the PDF file
+  const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(resumeFile.buffer))).getText(); // Extract text from the PDF file
 
   const { selfDescription, jobDescription } = req.body; // Access the self-description and job description from the request body
 
   const interviewReportByAi = await generateInterviewReport({
-    resume: resumeContent,
+    resume: resumeContent.text,
     selfDescription,
     jobDescription,
   }); // Call the generateInterviewReport function with the extracted resume content, self-description, and job description
 
   const interviewReport = await interviewReportModel.create({
     user: req.user._id,
-    resume: resumeContent,
+    resume: resumeContent.text,
     selfDescription,
     jobDescription,
     ...interviewReportByAi,
