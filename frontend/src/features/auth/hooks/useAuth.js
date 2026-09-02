@@ -56,9 +56,16 @@ export const useAuth = () => {
     useEffect(() => {
 
     const getAndSetUser = async () => {
-      const data = await getMe(); //getMe is a function that likely makes an API call to retrieve the current user's information.
-      setUser(data.user);
-      setLoading(false); //Once the user data is retrieved, we update the user state and set loading to false, indicating that the authentication operation is complete.
+      try {
+          const data = await getMe(); //getMe is a function that likely makes an API call to retrieve the current user's information.
+          setUser(data.user);
+      }
+      catch (err) {
+        console.log(err);
+      }
+      finally{
+        setLoading(false); //Once the user data is retrieved, we update the user state and set loading to false, indicating that the authentication operation is complete. 
+      }
     }
     getAndSetUser();
   },[])

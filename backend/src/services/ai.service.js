@@ -1,4 +1,10 @@
 const { GoogleGenAI } = require("@google/genai");
+const { z } = require("zod");
+const pdfParse = require("pdf-parse");
+const puppeteer = require("puppeteer");
+const { zodToJsonSchema } = require("zod-to-json-schema");
+
+
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_GENAI_API_KEY,
@@ -127,9 +133,15 @@ const interviewReportSchema = {
         required: ["day", "focus", "tasks"],
       },
     },
+
+    title : {
+      type: "string",
+      description: "A title of the job for which the report is generated."
+    },
   },
 
   required: [
+    "title",
     "matchScore",
     "summary",
     "strengths",
@@ -252,4 +264,165 @@ Return ONLY valid JSON matching the provided schema.
   }
 }
 
-module.exports = generateInterviewReport;
+
+async function generatePdfFromHtml(htmlContent) {
+
+    const browser = await puppeteer.launch();
+
+    const page = await browser.newPage();
+
+    await page.setContent(htmlContent, {
+        waitUntil: "domcontentloaded"
+    });
+
+    const pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: {
+            top: "20mm",
+            bottom: "20mm",
+            left: "15mm",
+            right: "15mm"
+        }
+    });
+
+    await browser.close();
+
+    return pdfBuffer;
+}
+
+
+async function generateResumePdf({ resume, selfDescription, jobDescription }) {
+
+  // console.log("1. generateResumePdf started");
+
+  const resumePdfSchema = z.object({
+    html: z.string().describe("HTML content of the resume")
+  });
+
+  // console.log("2. Schema created");
+
+  // const prompt = `Generate a resume for a candidate with the following details:
+  //   Resume: ${resume}
+  //   Self Description: ${selfDescription}
+  //   Job Description: ${jobDescription}
+
+  //   The format should be JSON object with a single field "html"
+  //   which contains the HTML content of the resume which can be converted to PDF.
+  // `;
+
+  //START
+  const prompt = `
+  Create a professional, ATS-friendly, ONE-PAGE A4 resume tailored to the job description using the candidate's existing resume and self-description.
+
+  IMPORTANT RULES:
+
+  - Use ONLY information provided in the candidate's resume/self-description. Never invent skills, experience, projects, education, certifications, achievements, links or dates.
+  - Tailor the resume to the job description by prioritizing relevant skills, projects, coursework and achievements that genuinely match the role.
+  - Do not blindly copy keywords from the job description unless the candidate actually has them.
+  - The resume must look human-written and professionally designed, NOT generic or AI-generated.
+  - Use concise, specific, action-oriented bullet points. Avoid buzzwords, exaggerated claims and repetitive phrases such as "passionate", "highly motivated", "results-driven", "leveraged", or "dynamic" unless genuinely appropriate.
+  - Do not add unnecessary sections or filler content.
+
+  STRUCTURE:
+
+  1. NAME + CONTACT INFORMATION
+  2. CAREER OBJECTIVE
+    - Write a personalized 3-4 line objective.
+    - Mention the candidate's actual background, strongest relevant technical skills and target role.
+    - Make it specific to the job description rather than a generic career statement.
+
+  3. EDUCATION
+    - Degree, institution, dates and CGPA/percentage where available.
+
+  4. TECHNICAL COMPETENCIES
+    - Organize relevant skills into clear categories such as Languages, Frontend, Backend, Databases, Tools and Core Subjects.
+    - Prioritize skills relevant to the target job.
+
+  5. PROJECTS
+    - Include the most relevant 2-3 projects.
+    - Give each project 2-4 concise bullets.
+    - Focus on what was built, technologies used, important implementation details and measurable/technical impact when actually provided.
+    - Do not invent metrics.
+
+  6. CERTIFICATIONS & ACHIEVEMENTS
+    - Include relevant certifications and genuine achievements.
+    - Prioritize items that strengthen the candidate's fit for the target role.
+
+  LAYOUT:
+
+  - The COMPLETE resume MUST fit on EXACTLY ONE A4 PAGE.
+  - Do NOT create a second page.
+  - Do NOT solve overflow by making the text extremely small.
+  - Keep the body text comfortably readable (approximately 9-11px).
+  - Use compact spacing, balanced margins and efficient section spacing.
+  - Keep headings visually distinct and consistent.
+  - Avoid excessive whitespace.
+  - Avoid large paragraphs.
+  - Keep project bullets concise so sections remain balanced.
+  - If content is too long, intelligently remove less relevant/redundant content rather than shrinking the entire resume excessively.
+  - Maintain a clean professional resume structure similar to a manually designed professional resume.
+
+  ATS REQUIREMENTS:
+
+  - Use standard section headings.
+  - Use simple HTML/CSS structure that renders reliably in Puppeteer.
+  - Do not use images, icons, charts, progress bars, columns that may break text extraction, or decorative elements that reduce ATS readability.
+  - Use readable fonts and strong text hierarchy.
+  - Keep contact information clearly visible at the top.
+
+  HTML REQUIREMENTS:
+
+  - Return a complete self-contained HTML document.
+  - Include all CSS inside a <style> tag.
+  - Set the document/page dimensions specifically for A4.
+  - Ensure the layout is optimized for Puppeteer PDF rendering.
+  - Use print-friendly CSS.
+  - The final HTML must render as exactly ONE A4 page.
+
+  Candidate Resume:
+  ${resume}
+
+  Candidate Self Description:
+  ${selfDescription}
+
+  Target Job Description:
+  ${jobDescription}
+
+  Return ONLY valid JSON:
+  {
+    "html": "complete HTML resume"
+  }
+  `;
+
+
+
+
+  //END
+
+  // console.log("3. Calling Gemini...");
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3.6-flash",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: zodToJsonSchema(resumePdfSchema),
+    },
+  });
+
+  // console.log("4. Gemini response received");
+
+  const jsonContent = JSON.parse(response.text);
+
+  // console.log("5. HTML received");
+  // console.log("HTML length:", jsonContent.html.length);
+
+  const pdfBuffer = await generatePdfFromHtml(jsonContent.html);
+
+  // console.log("6. PDF generated");
+
+  return pdfBuffer;
+}
+
+module.exports = {generateInterviewReport, generateResumePdf};
