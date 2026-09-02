@@ -279,10 +279,10 @@ async function generatePdfFromHtml(htmlContent) {
         format: "A4",
         printBackground: true,
         margin: {
-            top: "20mm",
-            bottom: "20mm",
-            left: "15mm",
-            right: "15mm"
+            top: "8mm",
+            bottom: "8mm",
+            left: "8mm",
+            right: "8mm"
         }
     });
 
@@ -352,16 +352,26 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
   LAYOUT:
 
   - The COMPLETE resume MUST fit on EXACTLY ONE A4 PAGE.
+  - Use the A4 page efficiently. Do NOT leave large unused blank areas at the bottom or sides.
+  - Use narrow but professional page margins: approximately 0.45-0.55 inch on all four sides.
+  - Use the full available content width while maintaining clean alignment.
+  - Keep the resume visually dense but NOT cramped.
+  - Body font size should be approximately 9.5-10.5px with comfortable line-height around 1.25-1.35.
+  - Candidate name should be larger and prominent, but do not waste vertical space with a large header.
+  - Keep section headings compact with approximately 6-8px spacing before and 3-5px after each heading.
+  - Keep project entries compact: approximately 2-4 concise bullets per project with minimal spacing between bullets.
+  - Keep bullet line-height tight and avoid unnecessary gaps between bullet points.
+  - Avoid excessive padding and margins inside sections.
+  - Keep education and certification entries compact and aligned efficiently.
+  - Do NOT insert unnecessary blank lines between sections.
+  - Do NOT vertically center the resume or distribute content evenly across the page.
+  - Content should naturally start near the top margin and use the available page height efficiently.
+  - Do NOT stretch content artificially just to fill the page; maintain a professional resume appearance.
+  - If content is too long, prioritize the most relevant information and remove redundancy rather than shrinking the entire resume excessively.
+  - If content is shorter than one page, use the available page width and reasonable spacing rather than leaving a large empty bottom area.
   - Do NOT create a second page.
-  - Do NOT solve overflow by making the text extremely small.
-  - Keep the body text comfortably readable (approximately 9-11px).
-  - Use compact spacing, balanced margins and efficient section spacing.
-  - Keep headings visually distinct and consistent.
-  - Avoid excessive whitespace.
-  - Avoid large paragraphs.
-  - Keep project bullets concise so sections remain balanced.
-  - If content is too long, intelligently remove less relevant/redundant content rather than shrinking the entire resume excessively.
-  - Maintain a clean professional resume structure similar to a manually designed professional resume.
+  - Do NOT use extremely small text to force content onto one page.
+  - The final result should resemble a professionally typeset one-page resume created manually in Overleaf: compact, structured, readable and information-dense.
 
   ATS REQUIREMENTS:
 
